@@ -1,8 +1,6 @@
-package com.sushitha.productcatalogservice.models;
+package com.sushitha.productcatalogservice.dtos;
 
-import com.sushitha.productcatalogservice.dtos.ProductDTO;
-
-public class Product {
+public class ProductDTO {
     private Long id;
     private String title;
     private String description;
@@ -11,9 +9,9 @@ public class Product {
     private String image;
 
     // Constructors
-    public Product() {}
+    public ProductDTO() {}
 
-    public Product(Long id, String title, String description, double price, String category, String image) {
+    public ProductDTO(Long id, String title, String description, double price, String category, String image) {
         this.id = id;
         this.title = title;
         this.description = description;
@@ -69,16 +67,5 @@ public class Product {
 
     public void setImage(String image) {
         this.image = image;
-    }
-
-    public ProductDTO toDTO() {
-        ProductDTO dto = new ProductDTO();
-        dto.setId(this.id);
-        dto.setTitle(this.title);
-        dto.setDescription(this.description);
-        dto.setPrice(this.price);
-        dto.setCategory(this.category);
-        dto.setImage(this.image);
-        return dto;
     }
 }

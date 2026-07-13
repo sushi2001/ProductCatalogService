@@ -1,39 +1,76 @@
-
-
 package com.sushitha.productcatalogservice.controllers;
 
-import com.sushitha.productcatalogservice.dtos.ProductRequestDTO;
-import com.sushitha.productcatalogservice.dtos.ProductResponseDTO;
-
+import com.sushitha.productcatalogservice.dtos.ProductDTO;
+import com.sushitha.productcatalogservice.models.Product;
+import com.sushitha.productcatalogservice.services.IProductService;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-        import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
+@RequestMapping("/products")
 public class ProductController {
 
-    @PostMapping("/products")
-    ProductResponseDTO createProduct(@RequestBody ProductRequestDTO product) {
+    private final IProductService productService;
 
-        ProductResponseDTO productResponseDTO = new ProductResponseDTO();
-
-        return productResponseDTO;
+    public ProductController(IProductService productService) {
+        this.productService = productService;
     }
 
-    @GetMapping("/products/{id}")
-    ProductResponseDTO getProductById(@PathVariable("id") Long id) {
+    @GetMapping("/{id}")
+    public ResponseEntity<ProductDTO> getProductById(@PathVariable Long id) {
 
-        ProductResponseDTO productResponseDTO = new ProductResponseDTO();
+        if (id < 1) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
 
-        return productResponseDTO;
+        Product product = productService.getProductById(id);
+
+        if (product == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+
+        return new ResponseEntity<>(product.toDTO(), HttpStatus.OK);
     }
 
-    @GetMapping("/products")
-    List<ProductResponseDTO> getAllProducts() {
+    @GetMapping
+    public ResponseEntity<List<ProductDTO>> getAllProducts() {
 
-        List<ProductResponseDTO> products = new ArrayList<>();
+        List<Product> products = productService.getAllProducts();
 
-        return products;
+        if (products.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+
+        List<ProductDTO> productDTOs = products.stream()
+                .map(Product::toDTO)
+                .collect(Collectors.toList());
+
+        return new ResponseEntity<>(productDTOs, HttpStatus.OK);
+    }
+
+    @PostMapping
+    public ResponseEntity<ProductDTO> createProduct(@RequestBody ProductDTO productDTO) {
+
+        // Placeholder implementation
+        return new ResponseEntity<>(HttpStatus.CREATED);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<ProductDTO> updateProduct(@PathVariable Long id,
+                                                    @RequestBody ProductDTO productDTO) {
+
+        // Placeholder implementation
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteProduct(@PathVariable Long id) {
+
+        // Placeholder implementation
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 }

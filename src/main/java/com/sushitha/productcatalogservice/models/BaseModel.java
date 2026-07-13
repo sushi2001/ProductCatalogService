@@ -1,7 +1,11 @@
 package com.sushitha.productcatalogservice.models;
 
-import java.util.Date;
+import lombok.Getter;
+import lombok.Setter;
 
+import java.util.Date;
+@Getter
+@Setter
 public abstract class BaseModel {
 
     private Long id;
