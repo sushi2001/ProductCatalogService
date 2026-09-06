@@ -51,26 +51,4 @@ public class ProductController {
 
         return new ResponseEntity<>(productDTOs, HttpStatus.OK);
     }
-
-    @PostMapping
-    public ResponseEntity<ProductDTO> createProduct(@RequestBody ProductDTO productDTO) {
-
-        // Placeholder implementation
-        return new ResponseEntity<>(HttpStatus.CREATED);
-    }
-
-    @PutMapping("/{id}")
-    public ResponseEntity<ProductDTO> updateProduct(@PathVariable Long id,
-                                                    @RequestBody ProductDTO productDTO) {
-
-        // Placeholder implementation
-        return new ResponseEntity<>(HttpStatus.OK);
-    }
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteProduct(@PathVariable Long id) {
-
-        // Placeholder implementation
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-    }
 }

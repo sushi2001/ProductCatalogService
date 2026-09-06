@@ -1,45 +1,65 @@
 package com.sushitha.productcatalogservice.services;
 
 import com.sushitha.productcatalogservice.dtos.FakeStoreProductDTO;
+import com.sushitha.productcatalogservice.models.Category;
 import com.sushitha.productcatalogservice.models.Product;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class FakeStoreProductService implements IProductService {
 
-    private final RestTemplate restTemplate;
-    private final String fakeStoreApiUrl = "https://fakestoreapi.com/products";
-
-    public FakeStoreProductService(RestTemplate restTemplate) {
-        this.restTemplate = restTemplate;
-    }
+    private RestTemplate restTemplate = new RestTemplate();
 
     @Override
     public Product getProductById(Long id) {
-        ResponseEntity<FakeStoreProductDTO> response = restTemplate.getForEntity(fakeStoreApiUrl + "/" + id, FakeStoreProductDTO.class);
 
-        if (response.getBody() != null) {
-            return response.getBody().toProduct();
-        }
-        return null;
+        FakeStoreProductDTO fakeStoreProductDTO =
+                restTemplate.getForObject(
+                        "https://fakestoreapi.com/products/" + id,
+                        FakeStoreProductDTO.class
+                );
+
+        return convertFakeStoreProductDtoToProduct(fakeStoreProductDTO);
     }
 
     @Override
     public List<Product> getAllProducts() {
-        ResponseEntity<FakeStoreProductDTO[]> response = restTemplate.getForEntity(fakeStoreApiUrl, FakeStoreProductDTO[].class);
 
-        if (response.getBody() != null) {
-            return Arrays.stream(response.getBody())
-                    .map(FakeStoreProductDTO::toProduct)
-                    .collect(Collectors.toList());
+        FakeStoreProductDTO[] fakeStoreProductDTOs =
+                restTemplate.getForObject(
+                        "https://fakestoreapi.com/products",
+                        FakeStoreProductDTO[].class
+                );
+
+        List<Product> products = new ArrayList<>();
+
+        for (FakeStoreProductDTO dto : fakeStoreProductDTOs) {
+            products.add(convertFakeStoreProductDtoToProduct(dto));
         }
-        return new ArrayList<>();
+
+        return products;
+    }
+
+    private Product convertFakeStoreProductDtoToProduct(
+            FakeStoreProductDTO fakeStoreProductDTO) {
+
+        Product product = new Product();
+
+        product.setId(fakeStoreProductDTO.getId());
+        product.setTitle(fakeStoreProductDTO.getTitle());
+        product.setDescription(fakeStoreProductDTO.getDescription());
+        product.setPrice(fakeStoreProductDTO.getPrice());
+        product.setImage(fakeStoreProductDTO.getImage());
+
+        Category category = new Category();
+        category.setName(fakeStoreProductDTO.getCategory());
+
+        product.setCategory(category);
+
+        return product;
     }
 }

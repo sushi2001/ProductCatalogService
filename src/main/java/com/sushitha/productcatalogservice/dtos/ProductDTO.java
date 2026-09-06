@@ -1,6 +1,10 @@
 package com.sushitha.productcatalogservice.dtos;
 
+import com.sushitha.productcatalogservice.models.Category;
+import com.sushitha.productcatalogservice.models.Product;
+
 public class ProductDTO {
+
     private Long id;
     private String title;
     private String description;
@@ -8,10 +12,11 @@ public class ProductDTO {
     private String category;
     private String image;
 
-    // Constructors
-    public ProductDTO() {}
+    public ProductDTO() {
+    }
 
-    public ProductDTO(Long id, String title, String description, double price, String category, String image) {
+    public ProductDTO(Long id, String title, String description,
+                      double price, String category, String image) {
         this.id = id;
         this.title = title;
         this.description = description;
@@ -20,7 +25,42 @@ public class ProductDTO {
         this.image = image;
     }
 
-    // Getters and Setters
+    public Product toProduct() {
+
+        Product product = new Product();
+
+        product.setId(this.id);
+        product.setTitle(this.title);
+        product.setDescription(this.description);
+        product.setPrice(this.price);
+        product.setImage(this.image);
+
+        Category categoryObj = new Category();
+        categoryObj.setName(this.category);
+
+        product.setCategory(categoryObj);
+
+        return product;
+    }
+
+    public static ProductDTO from(Product product) {
+
+        String categoryName = null;
+
+        if (product.getCategory() != null) {
+            categoryName = product.getCategory().getName();
+        }
+
+        return new ProductDTO(
+                product.getId(),
+                product.getTitle(),
+                product.getDescription(),
+                product.getPrice(),
+                categoryName,
+                product.getImage()
+        );
+    }
+
     public Long getId() {
         return id;
     }
