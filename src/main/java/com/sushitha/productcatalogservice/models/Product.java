@@ -1,5 +1,6 @@
 package com.sushitha.productcatalogservice.models;
 
+import com.sushitha.productcatalogservice.dtos.FakeStoreProductDTO;
 import com.sushitha.productcatalogservice.dtos.ProductDTO;
 import lombok.Getter;
 import lombok.Setter;
@@ -33,6 +34,23 @@ public class Product {
         }
 
         dto.setImage(this.image);
+
+        return dto;
+    }
+
+    public FakeStoreProductDTO convertToFakeStoreProductDTO() {
+
+        FakeStoreProductDTO dto = new FakeStoreProductDTO();
+
+        dto.setId(this.id);
+        dto.setTitle(this.title);
+        dto.setPrice(this.price);
+        dto.setDescription(this.description);
+        dto.setImage(this.image);
+
+        if (this.category != null) {
+            dto.setCategory(this.category.getName());
+        }
 
         return dto;
     }

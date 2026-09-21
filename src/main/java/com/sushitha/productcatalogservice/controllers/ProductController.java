@@ -7,8 +7,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/products")
@@ -21,34 +21,95 @@ public class ProductController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ProductDTO> getProductById(@PathVariable Long id) {
+    public ResponseEntity<ProductDTO> getProductById(
+            @PathVariable("id") Long id) {
 
-        if (id < 1) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        if (id <= 0) {
+            throw new IllegalArgumentException(
+                    "Invalid product ID: cannot be zero or negative"
+            );
         }
 
         Product product = productService.getProductById(id);
 
-        if (product == null) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        if (product != null) {
+
+            ProductDTO productDTO =
+                    ProductDTO.from(product);
+
+            return new ResponseEntity<>(
+                    productDTO,
+                    HttpStatus.OK
+            );
         }
 
-        return new ResponseEntity<>(product.toDTO(), HttpStatus.OK);
+        return new ResponseEntity<>(
+                HttpStatus.NOT_FOUND
+        );
     }
 
     @GetMapping
     public ResponseEntity<List<ProductDTO>> getAllProducts() {
 
-        List<Product> products = productService.getAllProducts();
+        List<Product> products =
+                productService.getAllProducts();
 
-        if (products.isEmpty()) {
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        if (products != null) {
+
+            List<ProductDTO> productDTOs =
+                    new ArrayList<>();
+
+            for (Product product : products) {
+
+                productDTOs.add(
+                        ProductDTO.from(product)
+                );
+            }
+
+            return new ResponseEntity<>(
+                    productDTOs,
+                    HttpStatus.OK
+            );
         }
 
-        List<ProductDTO> productDTOs = products.stream()
-                .map(Product::toDTO)
-                .collect(Collectors.toList());
+        return new ResponseEntity<>(
+                HttpStatus.NOT_FOUND
+        );
+    }
 
-        return new ResponseEntity<>(productDTOs, HttpStatus.OK);
+    @PutMapping("/{id}")
+    public ResponseEntity<ProductDTO> replaceProduct(
+            @PathVariable("id") Long id,
+            @RequestBody ProductDTO productDTO) {
+
+        if (id <= 0) {
+            throw new IllegalArgumentException(
+                    "Invalid product ID: cannot be zero or negative"
+            );
+        }
+
+        Product product =
+                productDTO.toProduct();
+
+        Product updatedProduct =
+                productService.replaceProduct(
+                        id,
+                        product
+                );
+
+        if (updatedProduct != null) {
+
+            ProductDTO responseDTO =
+                    ProductDTO.from(updatedProduct);
+
+            return new ResponseEntity<>(
+                    responseDTO,
+                    HttpStatus.OK
+            );
+        }
+
+        return new ResponseEntity<>(
+                HttpStatus.NOT_FOUND
+        );
     }
 }

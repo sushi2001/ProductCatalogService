@@ -1,10 +1,11 @@
 package com.sushitha.productcatalogservice.services;
 
+import com.sushitha.productcatalogservice.clients.FakeStoreApiClient;
 import com.sushitha.productcatalogservice.dtos.FakeStoreProductDTO;
-import com.sushitha.productcatalogservice.models.Category;
 import com.sushitha.productcatalogservice.models.Product;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,54 +13,81 @@ import java.util.List;
 @Service
 public class FakeStoreProductService implements IProductService {
 
-    private RestTemplate restTemplate = new RestTemplate();
+    @Autowired
+    private FakeStoreApiClient fakeStoreApiClient;
+
+    private static final String BASE_URL =
+            "https://fakestoreapi.com";
 
     @Override
     public Product getProductById(Long id) {
 
-        FakeStoreProductDTO fakeStoreProductDTO =
-                restTemplate.getForObject(
-                        "https://fakestoreapi.com/products/" + id,
-                        FakeStoreProductDTO.class
+        ResponseEntity<FakeStoreProductDTO> response =
+                fakeStoreApiClient.getForEntity(
+                        BASE_URL + "/products/{id}",
+                        FakeStoreProductDTO.class,
+                        id
                 );
 
-        return convertFakeStoreProductDtoToProduct(fakeStoreProductDTO);
+        if (response.hasBody()
+                && response.getStatusCode().value() == 200) {
+
+            FakeStoreProductDTO dto = response.getBody();
+
+            return dto.toProduct();
+        }
+
+        return null;
     }
 
     @Override
     public List<Product> getAllProducts() {
 
-        FakeStoreProductDTO[] fakeStoreProductDTOs =
-                restTemplate.getForObject(
-                        "https://fakestoreapi.com/products",
+        ResponseEntity<FakeStoreProductDTO[]> response =
+                fakeStoreApiClient.getForEntityArray(
+                        BASE_URL + "/products",
                         FakeStoreProductDTO[].class
                 );
 
-        List<Product> products = new ArrayList<>();
+        if (response.hasBody()
+                && response.getStatusCode().value() == 200) {
 
-        for (FakeStoreProductDTO dto : fakeStoreProductDTOs) {
-            products.add(convertFakeStoreProductDtoToProduct(dto));
+            FakeStoreProductDTO[] dtos = response.getBody();
+
+            List<Product> products = new ArrayList<>();
+
+            for (FakeStoreProductDTO dto : dtos) {
+                products.add(dto.toProduct());
+            }
+
+            return products;
         }
 
-        return products;
+        return null;
     }
 
-    private Product convertFakeStoreProductDtoToProduct(
-            FakeStoreProductDTO fakeStoreProductDTO) {
+    @Override
+    public Product replaceProduct(Long id, Product product) {
 
-        Product product = new Product();
+        FakeStoreProductDTO requestDto =
+                product.convertToFakeStoreProductDTO();
 
-        product.setId(fakeStoreProductDTO.getId());
-        product.setTitle(fakeStoreProductDTO.getTitle());
-        product.setDescription(fakeStoreProductDTO.getDescription());
-        product.setPrice(fakeStoreProductDTO.getPrice());
-        product.setImage(fakeStoreProductDTO.getImage());
+        ResponseEntity<FakeStoreProductDTO> response =
+                fakeStoreApiClient.putForEntity(
+                        BASE_URL + "/products/{id}",
+                        requestDto,
+                        FakeStoreProductDTO.class,
+                        id
+                );
 
-        Category category = new Category();
-        category.setName(fakeStoreProductDTO.getCategory());
+        if (response.hasBody()
+                && response.getStatusCode().value() == 200) {
 
-        product.setCategory(category);
+            FakeStoreProductDTO dto = response.getBody();
 
-        return product;
+            return dto.toProduct();
+        }
+
+        return null;
     }
 }
