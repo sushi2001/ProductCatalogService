@@ -2,6 +2,9 @@ package com.sushitha.productcatalogservice.models;
 
 import com.sushitha.productcatalogservice.dtos.FakeStoreProductDTO;
 import com.sushitha.productcatalogservice.dtos.ProductDTO;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Entity;
+import jakarta.persistence.ManyToOne;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.NoArgsConstructor;
@@ -11,20 +14,23 @@ import lombok.AllArgsConstructor;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class Product {
+@Entity
+public class Product extends BaseModel {
 
-    private Long id;
     private String title;
     private String description;
     private double price;
+
+    @ManyToOne(cascade = CascadeType.ALL)
     private Category category;
+
     private String image;
 
     public ProductDTO toDTO() {
 
         ProductDTO dto = new ProductDTO();
 
-        dto.setId(this.id);
+        dto.setId(this.getId());
         dto.setTitle(this.title);
         dto.setDescription(this.description);
         dto.setPrice(this.price);
@@ -42,7 +48,7 @@ public class Product {
 
         FakeStoreProductDTO dto = new FakeStoreProductDTO();
 
-        dto.setId(this.id);
+        dto.setId(this.getId());
         dto.setTitle(this.title);
         dto.setPrice(this.price);
         dto.setDescription(this.description);
